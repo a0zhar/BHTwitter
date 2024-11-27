@@ -3,15 +3,6 @@ name: Build and Release BHTwitter
 on:
   workflow_dispatch:
     inputs:
-      sdk_version:
-        description: "iOS SDK Version"
-        default: "16.5"
-        required: true
-        type: string
-      target_version:
-        description: "Target iOS Version"
-        default: "14.0"
-        required: true
       decrypted_ipa_url:
         description: "Direct URL of the decrypted X ipa"
         default: ""
@@ -85,7 +76,7 @@ jobs:
         id: SDK
         uses: actions/cache@v4
         env:
-          cache-name: iOS-${{ inputs.sdk_version }}-SDK
+          cache-name: iOS-17.0-SDK
         with:
           path: theos/sdks/
           key: ${{ env.cache-name }}
@@ -97,7 +88,7 @@ jobs:
           # Only download the specific SDK version
           git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
           cd sdks
-          git sparse-checkout set --no-cone iPhoneOS${{ inputs.sdk_version }}.sdk
+          git sparse-checkout set --no-cone iPhoneOS17.0.sdk
           git checkout
           mv ./*.sdk "${THEOS}/sdks"
         env:
@@ -125,7 +116,7 @@ jobs:
       - name: Build Package
         run: |
           cd ${{ github.workspace }}/main
-          sed -i '' "s/^TARGET.*$/TARGET := iphone:clang:${{ inputs.sdk_version }}:${{ inputs.target_version }}/" Makefile
+          sed -i '' "s/^TARGET.*$/TARGET := iphone:clang:17.0:17.0/" Makefile
           ./build.sh --${{ inputs.deploy_format }}
         env:
           THEOS: ${{ github.workspace }}/theos
